@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Lisp_Interpreter
 {
-    class Program
+    class Program2
     {
-        static Utilities util = new Utilities(@"code.txt");
+        static Utilities util = new Utilities(@"C:\Users\chris\Documents\GitHub\Lisp_Interpreter\code.txt");
         public static Lisp_Functions lisp = new Lisp_Functions();
         static Lisp_Dictionary dictionary = new Lisp_Dictionary();
         static void Main(string[] args)
@@ -18,10 +18,7 @@ namespace Lisp_Interpreter
                 {
                     line = Sub_All_Variable_Values(line);
 
-                    if (line.ToLower().Contains("if")) { }
-                    else if (line.ToLower().Contains("while")) { }
-
-                    int[] x = Get_Lowest_Bracket_Pair(line);
+                    int[] x = { 0, line.Length - 1 };
                     //Console.WriteLine(line);
                     line = Evaluate_Atom(x, line);
                 }
@@ -74,6 +71,32 @@ namespace Lisp_Interpreter
                 i++;
             }
             return pairs;
+        }
+
+        static int[] Get_X_Bracket_Pair(string line, int x)
+        {
+            int track = 0, i = 0;
+            int[] indexes = new int[2];
+
+            foreach (char c in line) {
+
+                if (c == '(') 
+                { 
+                    track++;
+                    if (x == 1) { indexes[0] = i; }
+                }
+                else if (c == ')') 
+                { 
+                    track--; 
+                    if (x == 1) { indexes[1] = i; } 
+                }
+
+                if (track == 0) x--;
+                if (x == 0) { return indexes; }
+                
+                i++;
+            }
+            return null;
         }
     }
 }

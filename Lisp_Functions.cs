@@ -9,6 +9,13 @@ namespace Lisp_Interpreter
     class Lisp_Functions
     {
         private Dictionary<string, string> variables = new Dictionary<string, string>();
+        
+        public string if_func(string s)
+        {
+
+            return "";
+        }
+
         public string print(string s)
         {
             foreach (string str in s.Split(" "))
