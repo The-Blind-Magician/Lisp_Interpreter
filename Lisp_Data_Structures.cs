@@ -25,7 +25,7 @@ namespace Lisp_Interpreter
                 foreach(char c in atm)
                 {
                     if (c == '(') ndx[0] = i;
-                    else if(c==')')ndx[]
+                    //else if(c==')')ndx[]
                 }
             }
 

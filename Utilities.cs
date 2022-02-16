@@ -51,6 +51,26 @@ namespace Lisp_Interpreter
             }
             return expr;
         }
+        public string Read_Next_Expression(string str)
+        {
+            int[] inx = { -1, -1 };
+            string expr = "";
+            int i = 0;
+            foreach (char c in str)
+            {
+                if (c == '(')
+                {
+                    inx[0] = i;
+                }
+                else if (c == ')')
+                {
+                    inx[1] = i;
+                }
+                if (inx[1] != -1) { return str.Substring(inx[0], inx[1] - inx[0] + 1); }
+                i++;
+            }
+            return expr;
+        }
         public string Read_Next_Word_From_Line(string line)
         {
             try

@@ -10,14 +10,14 @@ namespace Lisp_Interpreter
         public static Lisp_Functions lisp = new Lisp_Functions();
         static Lisp_Dictionary dictionary = new Lisp_Dictionary();
 
-        static Lisp_Data_Structures base_atom = new Lisp_Data_Structures();
+        //static Lisp_Data_Structures base_atom = new Lisp_Data_Structures();
         static void Main(string[] args)
         {
             string line = "";
             do
             {
                 line = util.Read_Next_Expression();
-                int ends
+
                 Console.WriteLine(line);
 
             } while (line != "");
