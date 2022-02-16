@@ -5,28 +5,22 @@ namespace Lisp_Interpreter
 {
     class Program
     {
-        static Utilities util = new Utilities(@"code.txt");
+
+        static Utilities util = new Utilities(@"C:\Users\chris\Documents\GitHub\Lisp_Interpreter\code.txt");
         public static Lisp_Functions lisp = new Lisp_Functions();
         static Lisp_Dictionary dictionary = new Lisp_Dictionary();
+
+        static Lisp_Data_Structures base_atom = new Lisp_Data_Structures();
         static void Main(string[] args)
         {
-            var line = util.Read_Next_Line_Of_File();
-            
-            while (line != "")
+            string line = "";
+            do
             {
-                while (line.Contains('('))
-                {
-                    line = Sub_All_Variable_Values(line);
+                line = util.Read_Next_Expression();
+                int ends
+                Console.WriteLine(line);
 
-                    if (line.ToLower().Contains("if")) { }
-                    else if (line.ToLower().Contains("while")) { }
-
-                    int[] x = Get_Lowest_Bracket_Pair(line);
-                    //Console.WriteLine(line);
-                    line = Evaluate_Atom(x, line);
-                }
-                line = util.Read_Next_Line_Of_File();
-            }
+            } while (line != "");
             
         }
 

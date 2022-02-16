@@ -34,6 +34,23 @@ namespace Lisp_Interpreter
                 return "";
             }
         }
+
+        public string Read_Next_Expression()
+        {
+            int track = 0;
+            string expr = "";
+            for(; lineNumber < fileStream.Length; lineNumber++)
+            {
+                foreach(char c in fileStream[lineNumber])
+                {
+                    if (c == '(') track++;
+                    else if (c == ')') track--;
+                }
+                expr += fileStream[lineNumber];
+                if (track == 0) { lineNumber++; return expr; }
+            }
+            return expr;
+        }
         public string Read_Next_Word_From_Line(string line)
         {
             try

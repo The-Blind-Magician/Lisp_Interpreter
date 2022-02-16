@@ -8,7 +8,7 @@ namespace Lisp_Interpreter
         static Utilities util = new Utilities(@"C:\Users\chris\Documents\GitHub\Lisp_Interpreter\code.txt");
         public static Lisp_Functions lisp = new Lisp_Functions();
         static Lisp_Dictionary dictionary = new Lisp_Dictionary();
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
             var line = util.Read_Next_Line_Of_File();
             
