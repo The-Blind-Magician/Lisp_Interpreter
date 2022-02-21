@@ -26,7 +26,8 @@ namespace Lisp_Interpreter
             dict.Add("number?", Program.lisp.number);
             dict.Add("null?", Program.lisp.nil);
             dict.Add("if", Program.lisp.if_func);
-            
+            dict.Add("begin", Program.lisp.begin);
+            dict.Add("=", Program.lisp.eq);
         }
     }
 }

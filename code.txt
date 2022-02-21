@@ -1,1 +1,2 @@
-﻿( + 3 ( + 4 2 ) )
+﻿(begin(if(> 5 2)(print( 5 > 2: true ) )(print ( 5 > 2: false)))
+(if(< 5 2)(print( 5 < 2: true ) )(print ( 5 < 2: false)))(if(= 5 2)(print( 5 = 2: true ) )(print ( 5 = 2: false))))

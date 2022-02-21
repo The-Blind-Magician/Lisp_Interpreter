@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Lisp_Interpreter
 {
@@ -38,7 +39,7 @@ namespace Lisp_Interpreter
         }
         public string Evaluate_Atom(int[] x, string line)
         {
-            string atom = line.Substring(x[0], x[1] - x[0]).Trim();
+            string atom = line.Substring(x[0], x[1] - x[0]+1).Trim();
             string atomArgs = line.Substring(x[0] + 1, x[1] - x[0] - 1).Trim();
             string answer = "";
             try
@@ -49,8 +50,8 @@ namespace Lisp_Interpreter
             {
                 return atomArgs;
             }
-
-            return line.Replace(atom, " " + answer + " ");
+            string temp = line[0..(x[0])] + " " + answer + " " + line[(x[1]+1)..];
+            return temp;
         }
         public string Read_Next_Whole_Expression()
         {
@@ -68,19 +69,42 @@ namespace Lisp_Interpreter
             }
             return expr;
         }
-        public int[] Read_Next_Partial_Expression(string str)
+        public int[] Read_First_Partial_Expression(string str)
         {
             int[] inx = { -1, -1 };
             int i = 0;
+            int track = 0;
             foreach (char c in str)
             {
-                if (c == '(')
+                if (c == '(' && track++ == 0 && inx[0] == -1)
                 {
                     inx[0] = i;
                 }
-                else if (c == ')')
+                else if (c == ')' && --track == 0 && inx[1] == -1)
                 {
                     inx[1] = i;
+                }
+                if (inx[1] != -1 && inx[0] != -1) { return inx; }
+                i++;
+            }
+            return inx;
+        }
+
+        public int[] Read_Next_Partial_Expression(string str, int[] prev)
+        {
+            str = str.Substring(prev[1] + 1);
+            int[] inx = { -1, -1 };
+            int i = 0;
+            int track = 0;
+            foreach (char c in str)
+            {
+                if (c == '(' && track++ == 0 && inx[0] == -1)
+                {
+                    inx[0] = i + prev[1];
+                }
+                else if (c == ')' && --track == 0 && inx[1] == -1)
+                {
+                    inx[1] = i + prev[1];
                 }
                 if (inx[1] != -1 && inx[0] != -1) { return inx; }
                 i++;
@@ -156,6 +180,14 @@ namespace Lisp_Interpreter
         public int Get_Current_Line_Number()
         {
             return lineNumber;
+        }
+        public string Prep_Input(string str)
+        {
+            str = str.Replace("(", " ( ");
+            str = str.Replace(")", " ) ");
+            str = String.Join(' ', str.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+
+            return str;
         }
     }
 }
