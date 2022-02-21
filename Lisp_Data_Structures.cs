@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lisp_Interpreter
+/*namespace Lisp_Interpreter
 {
     class Lisp_Data_Structures
     {
         public class Atom
         {
             string op = "";
-            List<string> exprs;
 
             public Atom()
             {
@@ -40,3 +39,4 @@ namespace Lisp_Interpreter
         }
     }
 }
+*/

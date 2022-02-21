@@ -5,14 +5,18 @@ namespace Lisp_Interpreter
 {
     class Utilities
     {
+        Lisp_Dictionary dictionary;
+        Lisp_Functions lisp;
         private string[] fileStream;
         private int numberOfLines = 0;
         private int lineNumber = 0;
         private int wordNumber = 0;
 
-        public Utilities(string filePath)
+        public Utilities(string filePath, Lisp_Dictionary dict, Lisp_Functions lisp)
         {
             Init_FileStream(filePath);
+            dictionary = dict;
+            this.lisp = lisp;
         }
 
         void Init_FileStream(string filePath)
@@ -29,19 +33,32 @@ namespace Lisp_Interpreter
             catch(IndexOutOfRangeException e)
             {
                 lineNumber = 0;
-                //Console.Error.WriteLine(e.Message);
-                //Console.Error.WriteLine("Index out of range. Returning first element.\nlineNumber set to: " + lineNumber);
                 return "";
             }
         }
+        public string Evaluate_Atom(int[] x, string line)
+        {
+            string atom = line.Substring(x[0], x[1] - x[0]).Trim();
+            string atomArgs = line.Substring(x[0] + 1, x[1] - x[0] - 1).Trim();
+            string answer = "";
+            try
+            {
+                answer = dictionary.dict[atomArgs.Split(" ")[0].ToLower()](atomArgs);
+            }
+            catch(Exception e)
+            {
+                return atomArgs;
+            }
 
-        public string Read_Next_Expression()
+            return line.Replace(atom, " " + answer + " ");
+        }
+        public string Read_Next_Whole_Expression()
         {
             int track = 0;
             string expr = "";
-            for(; lineNumber < fileStream.Length; lineNumber++)
+            for (; lineNumber < fileStream.Length; lineNumber++)
             {
-                foreach(char c in fileStream[lineNumber])
+                foreach (char c in fileStream[lineNumber])
                 {
                     if (c == '(') track++;
                     else if (c == ')') track--;
@@ -51,10 +68,9 @@ namespace Lisp_Interpreter
             }
             return expr;
         }
-        public string Read_Next_Expression(string str)
+        public int[] Read_Next_Partial_Expression(string str)
         {
             int[] inx = { -1, -1 };
-            string expr = "";
             int i = 0;
             foreach (char c in str)
             {
@@ -66,10 +82,45 @@ namespace Lisp_Interpreter
                 {
                     inx[1] = i;
                 }
-                if (inx[1] != -1) { return str.Substring(inx[0], inx[1] - inx[0] + 1); }
+                if (inx[1] != -1 && inx[0] != -1) { return inx; }
                 i++;
             }
-            return expr;
+            return inx;
+        }
+        string Sub_All_Variable_Values(string line)
+        {
+            string[] proc_line = line.Split(" ");
+            for (int i = 0; i < proc_line.Length; i++)
+            {
+                string var;
+                if ((var = lisp.get_var(proc_line[i])) != "")
+                {
+                    proc_line[i] = var;
+                }
+            }
+
+            var str = string.Join(" ", proc_line);
+            return str;
+        }
+        static int[] Get_Lowest_Bracket_Pair(string line)
+        {
+            int open = 0;
+            int[] pairs = new int[2];
+            int i = 0;
+            foreach (char c in line)
+            {
+                switch (c)
+                {
+                    case '(':
+                        open = i;
+                        break;
+                    case ')':
+                        pairs = new int[] { open, i };
+                        return pairs;
+                }
+                i++;
+            }
+            return pairs;
         }
         public string Read_Next_Word_From_Line(string line)
         {

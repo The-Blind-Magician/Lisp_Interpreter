@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Lisp_Interpreter
+/*namespace Lisp_Interpreter
 {
     class Program2
     {
-        static Utilities util = new Utilities(@"C:\Users\chris\Documents\GitHub\Lisp_Interpreter\code.txt");
         public static Lisp_Functions lisp = new Lisp_Functions();
         static Lisp_Dictionary dictionary = new Lisp_Dictionary();
+        static Utilities util = new Utilities(@"C:\Users\chris\Documents\GitHub\Lisp_Interpreter\code.txt");
         static void Main2(string[] args)
         {
             var line = util.Read_Next_Line_Of_File();
@@ -100,3 +100,4 @@ namespace Lisp_Interpreter
         }
     }
 }
+*/

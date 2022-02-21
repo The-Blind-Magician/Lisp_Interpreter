@@ -9,7 +9,6 @@ namespace Lisp_Interpreter
     class Lisp_Functions
     {
         private Dictionary<string, string> variables = new Dictionary<string, string>();
-        
         public string if_func(string s)
         {
 
@@ -18,9 +17,10 @@ namespace Lisp_Interpreter
 
         public string print(string s)
         {
+
             foreach (string str in s.Split(" "))
             {
-                if (str != "print") Console.Write(str + " ");
+                if (str != "print") Console.Write(str.Where(x=> (x!= '(') && (x != ')')) + " ");
             }
             Console.Write("\n");
             return "";
@@ -31,7 +31,7 @@ namespace Lisp_Interpreter
             foreach(KeyValuePair<string,string> k in variables)
             {
                 if (k.Key == input)
-                    return k.Value;
+                    return $"({k.Value})";
             }
             return "";
         }
@@ -46,6 +46,10 @@ namespace Lisp_Interpreter
         public string add(string input)
         {
             double total = 0;
+            if(input.Contains("("))
+            {
+                input = Program.util.Evaluate_Atom(Program.util.Read_Next_Partial_Expression(input), input);
+            }
             foreach(string x in input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..])
             {
                 total += Convert.ToDouble(x);
@@ -58,7 +62,7 @@ namespace Lisp_Interpreter
             var nums = input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..];
             double total = Convert.ToDouble(nums[0]);
             total -= Convert.ToDouble(nums[1]);
-            return total.ToString();
+            return $"({total.ToString()})";
         }
 
         public string div(string input)
@@ -67,7 +71,7 @@ namespace Lisp_Interpreter
 
             double total = Convert.ToDouble(nums[0]);
             total /= Convert.ToDouble(nums[1]);
-            return total.ToString();
+            return $"({total.ToString()})";
         }
 
         public string mul(string input)
@@ -79,7 +83,7 @@ namespace Lisp_Interpreter
             {
                 total *= Convert.ToDouble(x);
             }
-            return total.ToString();
+            return $"({total.ToString()})";
         }
 
         public string lt(string input)
@@ -101,7 +105,7 @@ namespace Lisp_Interpreter
             try
             {
                 Convert.ToDouble(input);
-                return "T";
+                return "(T)";
             }
             catch
             {
@@ -111,7 +115,7 @@ namespace Lisp_Interpreter
 
         public string nil(string input)
         {
-            return (input.Contains("()") ? "T" : "()");
+            return (input.Contains("()") ? "(T)" : "()");
         }
     }
 }
