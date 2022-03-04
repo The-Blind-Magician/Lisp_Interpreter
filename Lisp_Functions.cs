@@ -8,7 +8,7 @@ namespace Lisp_Interpreter
 {
     class Lisp_Functions
     {
-        private Dictionary<string, string> variables = new Dictionary<string, string>();
+        public Dictionary<string, string> variables = new Dictionary<string, string>();
         public string if_func(string s)
         {
             int[] inx = Program.util.Read_First_Partial_Expression(s);
@@ -78,6 +78,7 @@ namespace Lisp_Interpreter
                 int[] inx = Program.util.Read_First_Partial_Expression(s);
                 s = Program.util.Evaluate_Atom(inx, s);
             }
+            s = Program.util.Sub_All_Variable_Values(s);
             Console.WriteLine(s.Trim());
             return "";
         }
@@ -87,15 +88,22 @@ namespace Lisp_Interpreter
             foreach(KeyValuePair<string,string> k in variables)
             {
                 if (k.Key == input)
-                    return $"({k.Value})";
+                    return $"{k.Value}";
             }
             return "";
         }
 
         public string set(string input)
         {
-            string[] arr = input.Split(" ")[1..];
-            variables.Add(arr[1], arr[2]);
+            string[] arr = new string[2];
+            if (input.Contains("(") || input.Contains(")"))
+            {
+                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
+            }
+            arr = input.Split(" ")[1..].Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            if (variables.ContainsKey(arr[1])) arr[1] = get_var(arr[1]);
+            if (variables.ContainsKey(arr[0])) variables.Remove(arr[0]);
+            variables.Add(arr[0], arr[1]);
             return "";
         }
 
@@ -106,7 +114,8 @@ namespace Lisp_Interpreter
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
             }
-            foreach(string x in input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..])
+            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ");
+            foreach (string x in args)
             {
                 total += Convert.ToDouble(x);
             }
@@ -119,9 +128,9 @@ namespace Lisp_Interpreter
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
             }
-            var nums = input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..];
-            double total = Convert.ToDouble(nums[0]);
-            total -= Convert.ToDouble(nums[1]);
+            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ");
+            double total = Convert.ToDouble(args[0]);
+            total -= Convert.ToDouble(args[1]);
             return $"({total.ToString()})";
         }
 
@@ -131,10 +140,9 @@ namespace Lisp_Interpreter
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
             }
-            string[] nums = input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..];
-
-            double total = Convert.ToDouble(nums[0]);
-            total /= Convert.ToDouble(nums[1]);
+            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ");
+            double total = Convert.ToDouble(args[0]);
+            total /= Convert.ToDouble(args[1]);
             return $"({total.ToString()})";
         }
 
@@ -144,10 +152,9 @@ namespace Lisp_Interpreter
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
             }
-            string[] sep = input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..];
-
-            double total = Convert.ToDouble(sep[0]);
-            foreach (string x in sep[1..])
+            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ");
+            double total = Convert.ToDouble(args[0]);
+            foreach (string x in args[1..])
             {
                 total *= Convert.ToDouble(x);
             }
@@ -160,8 +167,8 @@ namespace Lisp_Interpreter
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
             }
-            string[] sep = input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..];
-            if (Convert.ToDouble(sep[0]) < Convert.ToDouble(sep[1])) return "T";
+            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ");
+            if (Convert.ToDouble(args[0]) < Convert.ToDouble(args[1])) return "T";
             return "()";
         }
         public string eq(string input)
@@ -170,8 +177,8 @@ namespace Lisp_Interpreter
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
             }
-            string[] sep = input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..];
-            if (Convert.ToDouble(sep[0]) == Convert.ToDouble(sep[1])) return "T";
+            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ");
+            if (Convert.ToDouble(args[0]) == Convert.ToDouble(args[1])) return "T";
             return "()";
         }
 
@@ -181,8 +188,8 @@ namespace Lisp_Interpreter
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
             }
-            string[] sep = input.Split(" ").Where(x => x != "" && x != " ").ToArray()[1..];
-            if (Convert.ToDouble(sep[0]) > Convert.ToDouble(sep[1])) return "T";
+            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ");
+            if (Convert.ToDouble(args[0]) > Convert.ToDouble(args[1])) return "T";
             return "()";
         }
 

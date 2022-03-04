@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Lisp_Interpreter
 {
@@ -44,11 +45,11 @@ namespace Lisp_Interpreter
             string answer = "";
             try
             {
-                answer = dictionary.dict[atomArgs.Split(" ")[0].ToLower()](atomArgs);
+                answer = dictionary.dict[atomArgs.Trim().Split(" ")[0].ToLower()](atomArgs);
             }
             catch(Exception e)
             {
-                return atomArgs;
+                return line[0..(x[0])] + " " + atomArgs + " " + line[(x[1] + 1)..];
             }
             string temp = line[0..(x[0])] + " " + answer + " " + line[(x[1]+1)..];
             return temp;
@@ -111,19 +112,14 @@ namespace Lisp_Interpreter
             }
             return inx;
         }
-        string Sub_All_Variable_Values(string line)
+        public string Sub_All_Variable_Values(string input)
         {
-            string[] proc_line = line.Split(" ");
-            for (int i = 0; i < proc_line.Length; i++)
+            string[] args = input.Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray()[1..];
+            for (int i = 0; i < args.Length; i++)
             {
-                string var;
-                if ((var = lisp.get_var(proc_line[i])) != "")
-                {
-                    proc_line[i] = var;
-                }
+                if (lisp.variables.ContainsKey(args[i])) args[i] = lisp.get_var(args[i]);
             }
-
-            var str = string.Join(" ", proc_line);
+            var str = string.Join(" ", args);
             return str;
         }
         static int[] Get_Lowest_Bracket_Pair(string line)
