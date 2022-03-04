@@ -28,6 +28,7 @@ namespace Lisp_Interpreter
             dict.Add("if", Program.lisp.if_func);
             dict.Add("begin", Program.lisp.begin);
             dict.Add("=", Program.lisp.eq);
+            dict.Add("while", Program.lisp.while_func);
         }
     }
 }

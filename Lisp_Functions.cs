@@ -48,6 +48,29 @@ namespace Lisp_Interpreter
             return "";
         }
 
+        public string while_func(string s)
+        {
+            int[] inx = Program.util.Read_First_Partial_Expression(s);
+            string evalStr = s.Substring(inx[0], inx[1] - inx[0] + 1);
+            string procStr = s.Substring(inx[1] + 1, s.Length - inx[1] - 1).Trim();
+            List<string> subs = new List<string>();
+            while(procStr != "")
+            {
+                inx = Program.util.Read_First_Partial_Expression(procStr);
+                string temp = procStr.Substring(inx[0], inx[1] - inx[0] + 1);
+                subs.Add(procStr.Substring(inx[0], inx[1] - inx[0] + 1));
+                procStr = procStr.Remove(inx[0], inx[1] + 1).Trim();
+            }
+            while (Program.util.Evaluate_Atom(new int[] { 0, (evalStr.Length - 1)}, evalStr).Contains("T"))
+            {
+                foreach(string str in subs)
+                {
+                    Program.util.Evaluate_Atom(new int[] { 0, str.Length - 1 }, str);
+                }
+            }
+            return "";
+        }
+
         public string print(string s)
         {
             while (s.Contains('('))
@@ -55,8 +78,7 @@ namespace Lisp_Interpreter
                 int[] inx = Program.util.Read_First_Partial_Expression(s);
                 s = Program.util.Evaluate_Atom(inx, s);
             }
-            var temp = s;
-            Console.WriteLine(s);
+            Console.WriteLine(s.Trim());
             return "";
         }
 
@@ -169,7 +191,7 @@ namespace Lisp_Interpreter
             try
             {
                 Convert.ToDouble(input);
-                return "(T)";
+                return "T";
             }
             catch
             {
@@ -179,7 +201,7 @@ namespace Lisp_Interpreter
 
         public string nil(string input)
         {
-            return (input.Contains("()") ? "(T)" : "()");
+            return (input.Contains("()") ? "T" : "()");
         }
     }
 }

@@ -1,2 +1,1 @@
-﻿(begin(if(> 5 2)(print( 5 > 2: true ) )(print ( 5 > 2: false)))
-(if(< 5 2)(print( 5 < 2: true ) )(print ( 5 < 2: false)))(if(= 5 2)(print( 5 = 2: true ) )(print ( 5 = 2: false))))
+﻿(while ( = 5 5) (print (1))(print((+ 1 1))))
