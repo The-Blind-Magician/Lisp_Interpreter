@@ -7,10 +7,8 @@ namespace Lisp_Interpreter
     {
         public static Lisp_Functions lisp = new Lisp_Functions();
         public static Lisp_Dictionary dictionary = new Lisp_Dictionary();
-        public static Utilities util = new Utilities(@"C:\Users\coe-cmholcombe\Documents\GitHub\Lisp_Interpreter\code.txt", dictionary, lisp);
+        public static Utilities util = new Utilities(@"C:\Users\chris\Documents\GitHub\Lisp_Interpreter\code.txt", dictionary, lisp);
        
-
-        //static Lisp_Data_Structures base_atom = new Lisp_Data_Structures();
         static void Main(string[] args)
         {
             string line = "";
@@ -20,10 +18,8 @@ namespace Lisp_Interpreter
                 if (line == "") break;
                 line = util.Prep_Input(line);
                 util.Evaluate_Atom(new int[] { 1, line.Length - 1 }, line);
-                //Console.WriteLine(line);
 
             } while (line != "");
-            
         }
 
         
