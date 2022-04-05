@@ -92,7 +92,7 @@ namespace Lisp_Interpreter
                 {
                     inx[1] = i;
                 }
-                if (inx[1] != -1 && inx[0] != -1) { return inx; }
+                if (inx[1] != -1 && inx[0] != -1 && inx[1] > inx[0]) { return inx; }
                 i++;
             }
             return inx;

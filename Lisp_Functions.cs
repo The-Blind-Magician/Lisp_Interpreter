@@ -6,8 +6,8 @@ namespace Lisp_Interpreter
 {
     class Defined_Function
     {
-        public Dictionary<string, string> vars = new Dictionary<string, string>();
         public List<string> statements = new List<string>();
+        public List<string> vars = new List<string>();
     }
     class Lisp_Functions
     {
@@ -15,17 +15,61 @@ namespace Lisp_Interpreter
         public Dictionary<string, Defined_Function> functions = new Dictionary<string, Defined_Function>();
         public string define(string s)
         {
-            string key = s.Split(" ").First();
+            string key = s.Split(" ")[1];
             s = s.Substring(s.IndexOf(' '));
-            functions.Add(key, new Defined_Function());
             int[] inx = Program.util.Read_Next_Partial_Expression(s, 0);
-            foreach (string str in s.Substring(inx[0] + 1, inx[1]-inx[0] + 1).Split(" "))
+
+            Defined_Function temp = new Defined_Function();
+            string[] arr = { "", " ", "(", ")" };
+            foreach (string str in s.Substring(inx[0] + 1, inx[1]-inx[0]).Split(" ").Where(x => !arr.Contains(x)).ToArray())
             {
-                Defined_Function temp = 
-                functions.TryGetValue(key)
+                if(!variables.ContainsKey(str))
+                    variables.Add(str, "");
+                temp.vars.Add(str);
             }
+
+            while (true)
+            {
+                inx = Program.util.Read_Next_Partial_Expression(s, inx[1]+1);
+                if (inx[0] * inx[1] <= 1) break;
+                temp.statements.Add(s.Substring(inx[0], inx[1] - inx[0] + 1));
+            }
+            functions.Add(key, temp);
+            Program.dictionary.dict.Add(key, Program.lisp.call);
             return "";
         }
+
+        public string call(string s)
+        {
+            s = s.Trim();
+            string key = s.Split(" ").First();
+            s = s[(s.IndexOf('(')+1)..(s.LastIndexOf(')')-1)].Trim();
+
+            Defined_Function temp = new Defined_Function();
+
+            functions.TryGetValue(key, out temp);
+
+            string[] arr = { "", " ", "(", ")" };
+            int i = 0;
+            foreach (string str in s.Split(" ").Where(x => !arr.Contains(x)))
+            {
+                variables[temp.vars[i]] = str;
+                i++;
+            }
+
+            foreach(string str in temp.statements)
+            {
+                Program.util.Evaluate_Atom(new int[] { 0, str.Length - 1 }, str);
+            }
+
+            foreach (string str in temp.vars)
+            {
+                variables[str] = "";
+            }
+
+            return "";
+        }
+
         public string if_func(string s)
         {
             int[] inx = Program.util.Read_First_Partial_Expression(s);
@@ -95,8 +139,11 @@ namespace Lisp_Interpreter
                 int[] inx = Program.util.Read_First_Partial_Expression(s);
                 s = Program.util.Evaluate_Atom(inx, s);
             }
-            s = Program.util.Sub_All_Variable_Values(s);
-            Console.WriteLine(s.Trim());
+            s = Program.util.Sub_All_Variable_Values(s).Trim();
+            if (s == "")
+                Console.WriteLine("()");
+            else
+                Console.WriteLine(s.Trim());
             return "";
         }
 
@@ -212,15 +259,39 @@ namespace Lisp_Interpreter
 
         public string number(string input)
         {
+            string[] arr = { "", " ", "(", ")", "number?" };
+            string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
+
             try
             {
-                Convert.ToDouble(input);
+                Convert.ToDouble(temp[0]);
                 return "T";
             }
             catch
             {
                 return "()";
             }
+        }
+
+        public string symbol(string input)
+        {
+            string[] arr = { "", " ", "(", ")", "symbol?" };
+            string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
+            if (Program.lisp.variables.ContainsKey(temp[0]))
+                return "T";
+            return "()";
+        }
+
+        public string ls(string input)
+        {
+            string[] arr = { "", " ", "(", ")", "list?" };
+            string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
+            foreach(string str in temp)
+            {
+                if (Program.dictionary.dict.ContainsKey(str))
+                    return "()";
+            }
+            return "T";
         }
 
         public string nil(string input)

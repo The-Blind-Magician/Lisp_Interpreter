@@ -25,10 +25,13 @@ namespace Lisp_Interpreter
             dict.Add(">", Program.lisp.gt);
             dict.Add("number?", Program.lisp.number);
             dict.Add("null?", Program.lisp.nil);
+            dict.Add("symbol?", Program.lisp.symbol);
+            dict.Add("list?", Program.lisp.ls);
             dict.Add("if", Program.lisp.if_func);
             dict.Add("begin", Program.lisp.begin);
             dict.Add("=", Program.lisp.eq);
             dict.Add("while", Program.lisp.while_func);
+            dict.Add("define", Program.lisp.define);
         }
     }
 }
