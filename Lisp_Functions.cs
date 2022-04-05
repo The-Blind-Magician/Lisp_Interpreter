@@ -4,14 +4,26 @@ using System.Linq;
 
 namespace Lisp_Interpreter
 {
+    class Defined_Function
+    {
+        public Dictionary<string, string> vars = new Dictionary<string, string>();
+        public List<string> statements = new List<string>();
+    }
     class Lisp_Functions
     {
         public Dictionary<string, string> variables = new Dictionary<string, string>();
-        public Dictionary<string, List<string>> functions = new Dictionary<string, List<string>>();
+        public Dictionary<string, Defined_Function> functions = new Dictionary<string, Defined_Function>();
         public string define(string s)
         {
-            functions.Add(s.Split(" ").First(), new List<string>());
-
+            string key = s.Split(" ").First();
+            s = s.Substring(s.IndexOf(' '));
+            functions.Add(key, new Defined_Function());
+            int[] inx = Program.util.Read_Next_Partial_Expression(s, 0);
+            foreach (string str in s.Substring(inx[0] + 1, inx[1]-inx[0] + 1).Split(" "))
+            {
+                Defined_Function temp = 
+                functions.TryGetValue(key)
+            }
             return "";
         }
         public string if_func(string s)

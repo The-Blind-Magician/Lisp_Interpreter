@@ -77,6 +77,26 @@ namespace Lisp_Interpreter
             }
             return inx;
         }
+        public int[] Read_Next_Partial_Expression(string str, int startIndex)
+        {
+            int[] inx = { -1, -1 };
+            int i = startIndex;
+            int track = 0;
+            foreach (char c in str[startIndex..])
+            {
+                if (c == '(' && track++ == 0 && inx[0] == -1)
+                {
+                    inx[0] = i;
+                }
+                else if (c == ')' && --track == 0 && inx[1] == -1)
+                {
+                    inx[1] = i;
+                }
+                if (inx[1] != -1 && inx[0] != -1) { return inx; }
+                i++;
+            }
+            return inx;
+        }
         public string Sub_All_Variable_Values(string input)
         {
             string[] args = input.Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray()[1..];

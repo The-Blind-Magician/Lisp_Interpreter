@@ -1,4 +1,1 @@
-﻿(set X 10)
-(print X)
-(set X (if(< X 9) (set X (+ X 1)) (set X (/ X 2))))
-(print X)
+﻿(print (4 1 10 25))
