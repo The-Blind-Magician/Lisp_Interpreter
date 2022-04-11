@@ -23,16 +23,16 @@ namespace Lisp_Interpreter
 
         void Init_FileStream(string filePath)
         {
-            fileStream = File.ReadAllLines(filePath);
+            fileStream = File.ReadAllLines(filePath).Where(x=> !String.IsNullOrWhiteSpace(x)).ToArray();
         }
-        public string Evaluate_Atom(int[] x, string line)
+        public string Evaluate_Atom(int[] x, string line, Defined_Function func)
         {
             string atom = line.Substring(x[0], x[1] - x[0]+1).Trim();
             string atomArgs = line.Substring(x[0] + 1, x[1] - x[0] - 1).Trim();
             string answer = "";
             try
             {
-                answer = dictionary.dict[atomArgs.Trim().Split(" ")[0].ToLower()](atomArgs);
+                answer = dictionary.dict[atomArgs.Trim().Split(" ")[0].ToLower()](atomArgs, func != null ? func : null);
             }
             catch(Exception e)
             {
@@ -97,12 +97,27 @@ namespace Lisp_Interpreter
             }
             return inx;
         }
-        public string Sub_All_Variable_Values(string input)
+        public string Sub_All_Variable_Values(string input, Defined_Function func = null)
         {
             string[] args = input.Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray()[1..];
             for (int i = 0; i < args.Length; i++)
             {
-                if (lisp.variables.ContainsKey(args[i])) args[i] = lisp.get_var(args[i]);
+                if (func != null)
+                {
+                    if (func.vars.ContainsKey(args[i]))
+                    {
+                        args[i] = lisp.get_var(args[i], func);
+                    }
+                    else
+                    {
+                        if (lisp.variables.ContainsKey(args[i])) 
+                            args[i] = lisp.get_var(args[i]);
+                    }
+                }
+                else if (lisp.variables.ContainsKey(args[i]))
+                {
+                    args[i] = lisp.get_var(args[i]);
+                }
             }
             var str = string.Join(" ", args);
             return str;
@@ -114,6 +129,14 @@ namespace Lisp_Interpreter
             str = String.Join(' ', str.Split(" ", StringSplitOptions.RemoveEmptyEntries));
 
             return str;
+        }
+        public string Evaluate_Nested_Functions(string input, Defined_Function func = null)
+        {
+            if (input.Contains("(") || input.Contains(")"))
+            {
+                return Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input, func);
+            }
+            else return input;
         }
     }
 }

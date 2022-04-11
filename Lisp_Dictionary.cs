@@ -7,7 +7,7 @@ namespace Lisp_Interpreter
 {
     class Lisp_Dictionary
     {
-        public Dictionary<string, Func<string, string>> dict = new Dictionary<string, Func<string, string>>();
+        public Dictionary<string, Func<string, Defined_Function, string>> dict = new Dictionary<string, Func<string, Defined_Function, string>>();
 
         public Lisp_Dictionary()
         {

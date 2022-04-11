@@ -7,13 +7,14 @@ namespace Lisp_Interpreter
     class Defined_Function
     {
         public List<string> statements = new List<string>();
-        public List<string> vars = new List<string>();
+        public Dictionary<string, string> vars = new Dictionary<string, string>();
+        public List<string> varLabels = new List<string>();
     }
     class Lisp_Functions
     {
         public Dictionary<string, string> variables = new Dictionary<string, string>();
         public Dictionary<string, Defined_Function> functions = new Dictionary<string, Defined_Function>();
-        public string define(string s)
+        public string define(string s, Defined_Function func = null)
         {
             string key = s.Split(" ")[1];
             s = s.Substring(s.IndexOf(' '));
@@ -23,9 +24,10 @@ namespace Lisp_Interpreter
             string[] arr = { "", " ", "(", ")" };
             foreach (string str in s.Substring(inx[0] + 1, inx[1]-inx[0]).Split(" ").Where(x => !arr.Contains(x)).ToArray())
             {
-                if(!variables.ContainsKey(str))
-                    variables.Add(str, "");
-                temp.vars.Add(str);
+                //if(!variables.ContainsKey(str))
+                //    variables.Add(str, "");
+                temp.vars.Add(str, "");
+                temp.varLabels.Add(str);
             }
 
             while (true)
@@ -39,48 +41,48 @@ namespace Lisp_Interpreter
             return "";
         }
 
-        public string call(string s)
+        public string call(string input, Defined_Function func = null)
         {
-            s = s.Trim();
-            string key = s.Split(" ").First();
-            s = s[(s.IndexOf('(')+1)..(s.LastIndexOf(')')-1)].Trim();
-
+            input = input.Trim();
+            string key = input.Split(" ").First();
+            input = Program.util.Sub_All_Variable_Values(input);
+            input = input[(input.IndexOf('(')+1)..(input.LastIndexOf(')')-1)].Trim();
             Defined_Function temp = new Defined_Function();
 
             functions.TryGetValue(key, out temp);
 
             string[] arr = { "", " ", "(", ")" };
             int i = 0;
-            foreach (string str in s.Split(" ").Where(x => !arr.Contains(x)))
+            foreach (string str in input.Split(" ").Where(x => !arr.Contains(x)))
             {
-                variables[temp.vars[i]] = str;
+                temp.vars[temp.varLabels[i]] = str;
                 i++;
             }
 
             foreach(string str in temp.statements)
             {
-                Program.util.Evaluate_Atom(new int[] { 0, str.Length - 1 }, str);
+                Program.util.Evaluate_Atom(new int[] { 0, str.Length - 1 }, str, temp);
             }
 
-            foreach (string str in temp.vars)
+            foreach (string str in temp.varLabels)
             {
-                variables[str] = "";
+                temp.vars[str] = "";
             }
 
             return "";
         }
 
-        public string if_func(string s)
+        public string if_func(string s, Defined_Function func = null)
         {
             int[] inx = Program.util.Read_First_Partial_Expression(s);
-            s = Program.util.Evaluate_Atom(inx, s);
+            s = Program.util.Evaluate_Atom(inx, s, func);
             if (s.Split(" ").Where(x => x != "" && x != " ").ToArray()[1] == "T")
             {
                 inx = Program.util.Read_First_Partial_Expression(s);
                 s = s.Substring(inx[0], inx[1] - inx[0] + 1).Trim();
                 inx[0] = 0;
                 inx[1] = s.Length - 1;
-                s = Program.util.Evaluate_Atom(inx, s);
+                s = Program.util.Evaluate_Atom(inx, s, func);
                 return "";
             }
             else
@@ -90,26 +92,26 @@ namespace Lisp_Interpreter
                 inx = Program.util.Read_First_Partial_Expression(s);
                 s = s.Replace(s.Substring(0, inx[1] + 1), "").Trim();
                 inx = Program.util.Read_First_Partial_Expression(s);
-                s = Program.util.Evaluate_Atom(inx, s);
+                s = Program.util.Evaluate_Atom(inx, s, func);
                 return "";
             }
             return "";
         }
 
-        public string begin(string s)
+        public string begin(string s, Defined_Function func = null)
         {
             s = s.Replace("begin", "").Trim();
             int[] inx = Program.util.Read_First_Partial_Expression(s);
             while(s.Contains("("))
             {
-                s = Program.util.Evaluate_Atom(inx, s);
+                s = Program.util.Evaluate_Atom(inx, s, func);
                 if (s != "")
                     inx = Program.util.Read_First_Partial_Expression(s);
             }
             return "";
         }
 
-        public string while_func(string s)
+        public string while_func(string s, Defined_Function func = null)
         {
             int[] inx = Program.util.Read_First_Partial_Expression(s);
             string evalStr = s.Substring(inx[0], inx[1] - inx[0] + 1);
@@ -122,48 +124,39 @@ namespace Lisp_Interpreter
                 subs.Add(procStr.Substring(inx[0], inx[1] - inx[0] + 1));
                 procStr = procStr.Remove(inx[0], inx[1] + 1).Trim();
             }
-            while (Program.util.Evaluate_Atom(new int[] { 0, (evalStr.Length - 1)}, evalStr).Contains("T"))
+            while (Program.util.Evaluate_Atom(new int[] { 0, (evalStr.Length - 1)}, evalStr, func).Contains("T"))
             {
                 foreach(string str in subs)
                 {
-                    Program.util.Evaluate_Atom(new int[] { 0, str.Length - 1 }, str);
+                    Program.util.Evaluate_Atom(new int[] { 0, str.Length - 1 }, str, func);
                 }
             }
             return "";
         }
 
-        public string print(string s)
+        public string print(string input, Defined_Function func = null)
         {
-            while (s.Contains('('))
-            {
-                int[] inx = Program.util.Read_First_Partial_Expression(s);
-                s = Program.util.Evaluate_Atom(inx, s);
-            }
-            s = Program.util.Sub_All_Variable_Values(s).Trim();
-            if (s == "")
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            input = Program.util.Sub_All_Variable_Values(input, func).Trim();
+            if (input == "")
                 Console.WriteLine("()");
             else
-                Console.WriteLine(s.Trim());
+                Console.WriteLine(input.Trim());
             return "";
         }
 
-        public string get_var(string input)
+        public string get_var(string input, Defined_Function func = null)
         {
-            foreach(KeyValuePair<string,string> k in variables)
-            {
-                if (k.Key == input)
-                    return $"{k.Value}";
-            }
-            return "";
+            if (func == null)
+                return variables[input];
+            else
+                return func.vars[input];
         }
 
-        public string set(string input)
+        public string set(string input, Defined_Function func = null)
         {
             string[] arr = new string[2];
-            if (input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
+            input = Program.util.Evaluate_Nested_Functions(input, func);
             arr = input.Split(" ")[1..].Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             if (variables.ContainsKey(arr[1])) arr[1] = get_var(arr[1]);
             if (variables.ContainsKey(arr[0])) variables.Remove(arr[0]);
@@ -171,14 +164,11 @@ namespace Lisp_Interpreter
             return "";
         }
 
-        public string add(string input)
+        public string add(string input, Defined_Function func = null)
         {
             double total = 0;
-            if(input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
-            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            string[] args = Program.util.Sub_All_Variable_Values(input, func).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             foreach (string x in args)
             {
                 total += Convert.ToDouble(x);
@@ -186,37 +176,28 @@ namespace Lisp_Interpreter
             return total.ToString();
         }
 
-        public string sub(string input)
+        public string sub(string input, Defined_Function func)
         {
-            if (input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
-            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            string[] args = Program.util.Sub_All_Variable_Values(input, func).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             double total = Convert.ToDouble(args[0]);
             total -= Convert.ToDouble(args[1]);
             return total.ToString();
         }
 
-        public string div(string input)
+        public string div(string input, Defined_Function func)
         {
-            if (input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
-            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            string[] args = Program.util.Sub_All_Variable_Values(input, func).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             double total = Convert.ToDouble(args[0]);
             total /= Convert.ToDouble(args[1]);
             return total.ToString();
         }
 
-        public string mul(string input)
+        public string mul(string input, Defined_Function func)
         {
-            if (input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
-            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            string[] args = Program.util.Sub_All_Variable_Values(input, func).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             double total = Convert.ToDouble(args[0]);
             foreach (string x in args[1..])
             {
@@ -225,39 +206,30 @@ namespace Lisp_Interpreter
             return total.ToString();
         }
 
-        public string lt(string input)
+        public string lt(string input, Defined_Function func)
         {
-            if (input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
-            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            string[] args = Program.util.Sub_All_Variable_Values(input, func).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             if (Convert.ToDouble(args[0]) < Convert.ToDouble(args[1])) return "T";
             return "()";
         }
-        public string eq(string input)
+        public string eq(string input, Defined_Function func)
         {
-            if (input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
-            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            string[] args = Program.util.Sub_All_Variable_Values(input, func).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             if (Convert.ToDouble(args[0]) == Convert.ToDouble(args[1])) return "T";
             return "()";
         }
 
-        public string gt(string input)
+        public string gt(string input, Defined_Function func)
         {
-            if (input.Contains("(") || input.Contains(")"))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input);
-            }
-            string[] args = Program.util.Sub_All_Variable_Values(input).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
+            input = Program.util.Evaluate_Nested_Functions(input, func);
+            string[] args = Program.util.Sub_All_Variable_Values(input, func).Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
             if (Convert.ToDouble(args[0]) > Convert.ToDouble(args[1])) return "T";
             return "()";
         }
 
-        public string number(string input)
+        public string number(string input, Defined_Function func)
         {
             string[] arr = { "", " ", "(", ")", "number?" };
             string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
@@ -273,7 +245,7 @@ namespace Lisp_Interpreter
             }
         }
 
-        public string symbol(string input)
+        public string symbol(string input, Defined_Function func)
         {
             string[] arr = { "", " ", "(", ")", "symbol?" };
             string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
@@ -282,7 +254,7 @@ namespace Lisp_Interpreter
             return "()";
         }
 
-        public string ls(string input)
+        public string ls(string input, Defined_Function func)
         {
             string[] arr = { "", " ", "(", ")", "list?" };
             string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
@@ -294,7 +266,7 @@ namespace Lisp_Interpreter
             return "T";
         }
 
-        public string nil(string input)
+        public string nil(string input, Defined_Function func)
         {
             return (input.Contains("()") ? "T" : "()");
         }
