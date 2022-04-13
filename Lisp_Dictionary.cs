@@ -32,6 +32,9 @@ namespace Lisp_Interpreter
             dict.Add("=", Program.lisp.eq);
             dict.Add("while", Program.lisp.while_func);
             dict.Add("define", Program.lisp.define);
+            dict.Add("car", Program.lisp.car);
+            dict.Add("cdr", Program.lisp.cdr);
+            dict.Add("cons", Program.lisp.cons);
         }
     }
 }

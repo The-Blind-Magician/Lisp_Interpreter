@@ -24,8 +24,6 @@ namespace Lisp_Interpreter
             string[] arr = { "", " ", "(", ")" };
             foreach (string str in s.Substring(inx[0] + 1, inx[1]-inx[0]).Split(" ").Where(x => !arr.Contains(x)).ToArray())
             {
-                //if(!variables.ContainsKey(str))
-                //    variables.Add(str, "");
                 temp.vars.Add(str, "");
                 temp.varLabels.Add(str);
             }
@@ -138,8 +136,10 @@ namespace Lisp_Interpreter
         {
             input = Program.util.Evaluate_Nested_Functions(input, func);
             input = Program.util.Sub_All_Variable_Values(input, func).Trim();
-            if (input == "")
+            if (input == "" || input == "()")
                 Console.WriteLine("()");
+            else if (input == "\\n")
+                Console.WriteLine("");
             else
                 Console.WriteLine(input.Trim());
             return "";
@@ -269,6 +269,58 @@ namespace Lisp_Interpreter
         public string nil(string input, Defined_Function func)
         {
             return (input.Contains("()") ? "T" : "()");
+        }
+
+        public string car(string input, Defined_Function func)
+        {
+            string[] arr = { "", " ", "car" };
+            string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
+            if (temp[1] != "(") return temp[1];
+            int[] inx = { -1, -1 };
+            int track = 0;
+            for (int i = 1; i < temp.Length; i++)
+            {
+                if (temp[i] == "(")
+                {
+                    if (track == 0)
+                        inx[0] = i;
+                    track++;
+                }
+                else if (temp[i] == ")")
+                {
+                    track--;
+                    if (track == 0)
+                    {
+                        inx[1] = i + 1;
+                        break;
+                    }
+                }
+            }
+            return String.Join(" ", temp[inx[0]..inx[1]]);
+        }
+
+        public string cdr(string input, Defined_Function func)
+        {
+            string[] arr = { "", " " };
+            string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
+            string res = String.Join(" ", temp);
+            res = res.Replace("cdr", "car");
+            string getCar = car(res, null);
+            res = res.Replace(getCar, "");
+            return res[res.IndexOf('(')..];
+        }
+
+        public string cons(string input, Defined_Function func)
+        {
+            int x = input.Where(x => Program.dictionary.dict.Keys.ToArray().ToString().Contains(x)).Count();
+            for (; x > 0; x--)
+            {
+                input = Program.util.Evaluate_Nested_Functions(input, func);
+            }
+            string[] arr = { "", " ", "cons" };
+            string[] temp = input.Split(" ").Where(x => !arr.Contains(x)).ToArray();
+            string res = "( " + String.Join(" ", temp) + " )";
+            return res;
         }
     }
 }

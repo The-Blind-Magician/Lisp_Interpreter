@@ -132,11 +132,11 @@ namespace Lisp_Interpreter
         }
         public string Evaluate_Nested_Functions(string input, Defined_Function func = null)
         {
-            if (input.Contains("(") || input.Contains(")"))
+            while (input.Contains("(") || input.Contains(")"))
             {
-                return Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input, func);
+                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input, func);
             }
-            else return input;
+            return input;
         }
     }
 }
