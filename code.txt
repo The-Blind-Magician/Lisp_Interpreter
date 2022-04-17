@@ -16,3 +16,7 @@
 
 (print ( 10 > 5 should be T -> (> 10 5)))
 (print ( 10 < 5 should be () -> (< 10 5)))
+(print \n)
+
+(print (10 = 10 should be T -> (= 10 10)))
+(print (10 = 5 should be () -> (= 10 5)))

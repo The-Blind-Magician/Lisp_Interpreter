@@ -134,7 +134,7 @@ namespace Lisp_Interpreter
 
         public string print(string input, Defined_Function func = null)
         {
-            input = Program.util.Evaluate_Nested_Functions(input, func);
+            input = Program.util.Evaluate_Nested_Functions (input, func);
             input = Program.util.Sub_All_Variable_Values(input, func).Trim();
             if (input == "" || input == "()")
                 Console.WriteLine("()");

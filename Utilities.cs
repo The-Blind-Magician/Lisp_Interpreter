@@ -27,6 +27,7 @@ namespace Lisp_Interpreter
         }
         public string Evaluate_Atom(int[] x, string line, Defined_Function func)
         {
+            if (x[0] == -1 && x[1] == -1) return line;
             string atom = line.Substring(x[0], x[1] - x[0]+1).Trim();
             string atomArgs = line.Substring(x[0] + 1, x[1] - x[0] - 1).Trim();
             string answer = "";
@@ -36,6 +37,7 @@ namespace Lisp_Interpreter
             }
             catch(Exception e)
             {
+                if (atomArgs == " ") atomArgs = "()";
                 return line[0..(x[0])] + " " + atomArgs + " " + line[(x[1] + 1)..];
             }
             string temp = line[0..(x[0])] + " " + answer + " " + line[(x[1]+1)..];
@@ -74,10 +76,11 @@ namespace Lisp_Interpreter
                 }
                 if (inx[1] != -1 && inx[0] != -1) 
                 {
-                    if (inx[1] - inx[0] == 1)
+                    if (inx[1] - inx[0] <= 2)
                     {
-                        inx[0] = 0;
-                        inx[1] = 0;
+                        inx[0] = -1;
+                        inx[1] = -1;
+                        track = 0;
                     }
                     else
                     {
@@ -143,10 +146,11 @@ namespace Lisp_Interpreter
         }
         public string Evaluate_Nested_Functions(string input, Defined_Function func = null)
         {
-            Regex r = new Regex("[(][^)]+[)]");
-            if (r.IsMatch(input))
-            {
-                input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input, func);
+            while (input.Contains("("))
+            { 
+                int[] x = Program.util.Read_First_Partial_Expression(input);
+                if (x[0] == -1) return input.Replace("( )", "()");
+                input = Program.util.Evaluate_Atom(x, input, func);
             }
             return input;
         }
