@@ -72,7 +72,18 @@ namespace Lisp_Interpreter
                 {
                     inx[1] = i;
                 }
-                if (inx[1] != -1 && inx[0] != -1) { return inx; }
+                if (inx[1] != -1 && inx[0] != -1) 
+                {
+                    if (inx[1] - inx[0] == 1)
+                    {
+                        inx[0] = 0;
+                        inx[1] = 0;
+                    }
+                    else
+                    {
+                        return inx;
+                    }
+                }
                 i++;
             }
             return inx;
@@ -132,7 +143,8 @@ namespace Lisp_Interpreter
         }
         public string Evaluate_Nested_Functions(string input, Defined_Function func = null)
         {
-            while (input.Contains("(") || input.Contains(")"))
+            Regex r = new Regex("[(][^)]+[)]");
+            if (r.IsMatch(input))
             {
                 input = Program.util.Evaluate_Atom(Program.util.Read_First_Partial_Expression(input), input, func);
             }
