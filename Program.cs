@@ -12,14 +12,14 @@ namespace Lisp_Interpreter
         static void Main(string[] args)
         {
 
-            util = new Utilities(@"C:\Users\chris\Documents\GitHub\Lisp_Interpreter\code.txt", dictionary, lisp);
+            util = new Utilities(@"C:\Users\coe-cmholcombe\Documents\GitHub\Lisp_Interpreter\code.txt", dictionary, lisp);
             string line = "";
             do
             {
                 line = util.Read_Next_Whole_Expression().Trim();
                 if (line == "") break;
-                line = util.Prep_Input(line);
-                util.Evaluate_Atom(new int[] { 0, line.Length - 1 }, line, null);
+                util.Prep_Input(ref line);
+                util.Evaluate_Atom(new int[] { 0, line.Length - 1 }, ref line, null);
             } while (line != "");
         }
 

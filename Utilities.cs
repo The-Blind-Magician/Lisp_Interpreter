@@ -10,9 +10,7 @@ namespace Lisp_Interpreter
         Lisp_Dictionary dictionary;
         Lisp_Functions lisp;
         private string[] fileStream;
-        private int numberOfLines = 0;
         private int lineNumber = 0;
-        private int wordNumber = 0;
 
         public Utilities(string filePath, Lisp_Dictionary dict, Lisp_Functions lisp)
         {
@@ -28,7 +26,7 @@ namespace Lisp_Interpreter
         public void Evaluate_Atom(int[] x, ref string line, Defined_Function func)
         {
             if (x[0] == -1 && x[1] == -1) return; 
-            string atom = line.Substring(x[0], x[1] - x[0] + 1).Trim();
+            string atom = line.Substring(x[0], x[1] - x[0]).Trim();
             string atomArgs = atom[(atom.IndexOf('(') + 1)..atom.LastIndexOf(')')].Trim();
             string answer = "";
             try
@@ -60,24 +58,26 @@ namespace Lisp_Interpreter
             }
             return expr;
         }
-        public int[] Read_First_Partial_Expression(string str)
+        public int[] Read_First_Partial_Expression(string input)
         {
+            Prep_Input(ref input);
             int[] inx = { -1, -1 };
             int i = 0;
             int track = 0;
-            foreach (char c in str)
+            string[] subArr = Program.util.Get_Substring_Array(input);
+            foreach (string c in subArr)
             {
-                if (c == '(' && track++ == 0 && inx[0] == -1)
+                if (c == "(" && track++ == 0 && inx[0] == -1)
                 {
                     inx[0] = i;
                 }
-                else if (c == ')' && --track == 0 && inx[1] == -1)
+                else if (c == ")" && --track == 0 && inx[1] == -1)
                 {
                     inx[1] = i;
                 }
                 if (inx[1] != -1 && inx[0] != -1) 
                 {
-                    if (inx[1] - inx[0] < 2)
+                    if (inx[1] + inx[0] < 2)
                     {
                         inx[0] = -1;
                         inx[1] = -1;
@@ -85,31 +85,22 @@ namespace Lisp_Interpreter
                     }
                     else
                     {
-                        return inx;
+                        string str = String.Join(" ", subArr[inx[0]..(inx[1]+1)]);
+                        int temp = input.IndexOf(str);
+                        return new int[] { temp, str.Length + temp };
                     }
                 }
                 i++;
             }
+            inx = new int[] {-1,-1};
             return inx;
         }
-        public int[] Read_Next_Partial_Expression(string str, int startIndex)
+        public int[] Read_Next_Partial_Expression(string str, int startIndex) ///////SOMEHOW LOSING LAST BRACKET
         {
-            int[] inx = { -1, -1 };
-            int i = startIndex;
-            int track = 0;
-            foreach (char c in str[startIndex..])
-            {
-                if (c == '(' && track++ == 0 && inx[0] == -1)
-                {
-                    inx[0] = i;
-                }
-                else if (c == ')' && --track == 0 && inx[1] == -1)
-                {
-                    inx[1] = i;
-                }
-                if (inx[1] != -1 && inx[0] != -1 && inx[1] > inx[0]) { return inx; }
-                i++;
-            }
+            string temp = str[startIndex..];
+            int[] inx = Read_First_Partial_Expression(temp);
+            inx[0] += startIndex != 0 ? startIndex + 1 : startIndex;
+            inx[1] += startIndex != 0 ? startIndex + 1 : startIndex;
             return inx;
         }
         public void Sub_All_Variable_Values(ref string input, Defined_Function func = null)
@@ -136,13 +127,28 @@ namespace Lisp_Interpreter
             }
             input = string.Join(" ", args);
         }
-        public string Prep_Input(string str)
+        public void Prep_Input(ref string input)
         {
-            str = str.Replace("(", " ( ");
-            str = str.Replace(")", " ) ");
-            str = String.Join(' ', str.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-
-            return str;
+            for(int i = 0; i < input.Length; i++)
+            {
+                if(input[i] == '(' || input[i] == ')')
+                {
+                    if((i > 0 && i < input.Length - 1) && (input[i-1] == '\'' || input[i+1] == '\''))
+                    {
+                        continue;
+                    }
+                    else if(i == 0)
+                    {
+                        input = input[i] + " " + input[(i + 1)..];
+                    }
+                    else
+                    {
+                        input = input[..(i)] + " " + input[i] + " " + input[(i + 1)..];
+                        i++;
+                    }
+                }
+            }
+            input = Recompile_String(Get_Substring_Array(input));
         }
         public void Evaluate_Nested_Functions(ref string input, Defined_Function func = null)
         {
@@ -154,15 +160,16 @@ namespace Lisp_Interpreter
                     input = input.Replace("( )", "()").Trim();
                     return;
                 }
-                input = Program.util.Evaluate_Atom(x, input, func).Trim();
+                Program.util.Evaluate_Atom(x, ref input, func);
+                input = input.Trim();
             }
             input = input.Trim();
         }
 
         public string Extract_Key(ref string input)
         {
-            string key = input.Trim().Split(" ")[1]; //Extract key from atom
-            input = input.Substring(input.IndexOf(' ')).Trim(); //Remove key from atom for arg(s) processing
+            string key = input.Trim().Split(" ")[0]; //Extract key from atom
+            input = input[(input.IndexOf(key) + key.Length)..].Trim(); //Remove key from atom for arg(s) processing
             return key;
         }
 

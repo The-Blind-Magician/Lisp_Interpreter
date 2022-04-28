@@ -1,39 +1,11 @@
-﻿(print (5 + 5 should be 10 -> (+ 5 5)))
-(print (5 + -5 should be 0 -> (+ 5 -5)))
-(print \n)
-
-(print (10 - 5 should be 5 -> (- 10 5)))
-(print (10 - -5 should be 15 -> (- 10 -5)))
-(print \n)
-
-(print (10 / 5 should be 2 -> (/ 10 5)))
-(print (10 / -5 should be -2 -> (/ 10 -5)))
-(print \n)
-
-(print (10 * 5 should be 50 -> (* 10 5)))
-(print (10 * -5 should be -50 -> (* 10 -5)))
-(print \n)
-
-(print ( 10 > 5 should be T -> (> 10 5)))
-(print ( 10 < 5 should be {} -> (< 10 5)))
-(print \n)
-
-(print (10 = 10 should be T -> (= 10 10)))
-(print (10 = 5 should be {} -> (= 10 5)))
-(print \n)
-
-(print ('number? 5 should be T -> (number? 4)))
-(print ('number? Hello should be {} -> (number? Hello)))
-(print \n)
-
-(set X 10)
-(print ('symbol? 'X should be T -> (symbol? X)))
-(print ('symbol? 'Y should be {} -> (symbol? Y)))
-(print \n)
-
-(print ('list? {1 2 3} should be T -> (list? (1 2 3))))
-(print ('list? 4 should be {} -> (list? 4)))
-(print \n)
-
-(print ('null? {} should be T -> (null? ())))
-(print ('null? T should be {} -> (null? T)))
+﻿(define fib (X Y Z)
+	(print (Y))
+	(if (= Z 0) 
+		()
+		(if (= 0 Y)
+			(fib (X (+ 1 Y) (- Z 1)))
+			(fib (Y (+ X Y) (- Z 1)))
+		)
+	)
+)
+(fib (0 0 5))

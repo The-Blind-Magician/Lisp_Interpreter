@@ -15,25 +15,25 @@
 (print \n)
 
 (print ( 10 > 5 should be T -> (> 10 5)))
-(print ( 10 < 5 should be () -> (< 10 5)))
+(print ( 10 < 5 should be '()' -> (< 10 5)))
 (print \n)
 
 (print (10 = 10 should be T -> (= 10 10)))
-(print (10 = 5 should be () -> (= 10 5)))
+(print (10 = 5 should be '()' -> (= 10 5)))
 (print \n)
 
-(print ('number? 5 should be T -> (number? 4)))
-(print ('number? Hello should be () -> (number? Hello)))
+(print ( 'number? 5 should be T -> (number? 4)))
+(print ( 'number? Hello should be '()' -> (number? Hello)))
 (print \n)
 
 (set X 10)
-(print ('symbol? 'X should be T -> (symbol? X)))
-(print ('symbol? 'Y should be () -> (symbol? Y)))
+(print ( 'symbol? 'X should be T -> (symbol? X)))
+(print ( 'symbol? 'Y should be '()' -> (symbol? Y)))
 (print \n)
 
-(print ('list? {1 2 3} should be T -> (list? (1 2 3))))
-(print ('list? 4 should be () -> (list? 4)))
+(print ( 'list? {1 2 3} should be T -> (list? (1 2 3))))
+(print ( 'list? 4 should be '()' -> (list? 4)))
 (print \n)
 
-(print ('null? () should be T -> (null? ())))
-(print ('null? T should be () -> (null? T)))
+(print ( 'null? '()' should be T -> (null? ())))
+(print ( 'null? T should be '()' -> (null? T)))
