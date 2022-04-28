@@ -25,23 +25,24 @@ namespace Lisp_Interpreter
         {
             fileStream = File.ReadAllLines(filePath).Where(x=> !String.IsNullOrWhiteSpace(x)).ToArray();
         }
-        public string Evaluate_Atom(int[] x, string line, Defined_Function func)
+        public void Evaluate_Atom(int[] x, ref string line, Defined_Function func)
         {
-            if (x[0] == -1 && x[1] == -1) return line;
-            string atom = line.Substring(x[0], x[1] - x[0]+1).Trim();
-            string atomArgs = line.Substring(x[0] + 1, x[1] - x[0] - 1).Trim();
+            if (x[0] == -1 && x[1] == -1) return; 
+            string atom = line.Substring(x[0], x[1] - x[0] + 1).Trim();
+            string atomArgs = atom[(atom.IndexOf('(') + 1)..atom.LastIndexOf(')')].Trim();
             string answer = "";
             try
             {
-                answer = dictionary.dict[atomArgs.Trim().Split(" ")[0].ToLower()](atomArgs, func != null ? func : null);
+                var op = atomArgs.Trim().Split(" ")[0];
+                answer = dictionary.dict[op](atomArgs, func != null ? func : null);
             }
             catch(Exception e)
             {
                 if (atomArgs == " ") atomArgs = "()";
-                return line[0..(x[0])] + " " + atomArgs + " " + line[(x[1] + 1)..];
+                line = line[0..(x[0])] + " " + atomArgs + " " + line[(x[1] + 1)..];
+                return;
             }
-            string temp = line[0..(x[0])] + " " + answer + " " + line[(x[1]+1)..];
-            return temp;
+            line = line[0..(x[0])] + " " + answer + " " + line[(x[1] + 1)..];
         }
         public string Read_Next_Whole_Expression()
         {
@@ -76,7 +77,7 @@ namespace Lisp_Interpreter
                 }
                 if (inx[1] != -1 && inx[0] != -1) 
                 {
-                    if (inx[1] - inx[0] <= 2)
+                    if (inx[1] - inx[0] < 2)
                     {
                         inx[0] = -1;
                         inx[1] = -1;
@@ -111,9 +112,9 @@ namespace Lisp_Interpreter
             }
             return inx;
         }
-        public string Sub_All_Variable_Values(string input, Defined_Function func = null)
+        public void Sub_All_Variable_Values(ref string input, Defined_Function func = null)
         {
-            string[] args = input.Split(" ").Where(x => !String.IsNullOrWhiteSpace(x)).ToArray()[1..];
+            string[] args = Get_Substring_Array(input);
             for (int i = 0; i < args.Length; i++)
             {
                 if (func != null)
@@ -133,8 +134,7 @@ namespace Lisp_Interpreter
                     args[i] = lisp.get_var(args[i]);
                 }
             }
-            var str = string.Join(" ", args);
-            return str;
+            input = string.Join(" ", args);
         }
         public string Prep_Input(string str)
         {
@@ -144,15 +144,38 @@ namespace Lisp_Interpreter
 
             return str;
         }
-        public string Evaluate_Nested_Functions(string input, Defined_Function func = null)
+        public void Evaluate_Nested_Functions(ref string input, Defined_Function func = null)
         {
             while (input.Contains("("))
-            { 
+            {
                 int[] x = Program.util.Read_First_Partial_Expression(input);
-                if (x[0] == -1) return input.Replace("( )", "()");
-                input = Program.util.Evaluate_Atom(x, input, func);
+                if (x[0] == -1)
+                {
+                    input = input.Replace("( )", "()").Trim();
+                    return;
+                }
+                input = Program.util.Evaluate_Atom(x, input, func).Trim();
             }
-            return input;
+            input = input.Trim();
+        }
+
+        public string Extract_Key(ref string input)
+        {
+            string key = input.Trim().Split(" ")[1]; //Extract key from atom
+            input = input.Substring(input.IndexOf(' ')).Trim(); //Remove key from atom for arg(s) processing
+            return key;
+        }
+
+        public string[] Get_Substring_Array(string input, int[] inx = null, string[] filtChars = null)
+        {
+            filtChars ??= new string[] {  };
+            inx ??= new int[] { 0, input.Length };
+            return input.Substring(inx[0], inx[1] - inx[0]).Split(" ").Where(x => !filtChars.Contains(x) && !String.IsNullOrWhiteSpace(x)).ToArray();
+        }
+
+        public string Recompile_String(string[] input)
+        {
+            return String.Join(" ", input);
         }
     }
 }

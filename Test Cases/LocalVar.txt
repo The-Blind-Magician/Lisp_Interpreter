@@ -1,0 +1,18 @@
+﻿(define printAdd (A B)
+	(print ( + A B ))
+)
+(define add (A B)
+	( + A B )
+)
+(print add [4, 5] should be 9 -> (add (4 5)))
+
+(set X 10)
+(set Y 5)
+(print 'X => X)
+(print 'Y => Y)
+
+(print add ['X, 'Y] should be 15 -> (add (X Y)))
+(print \n)
+
+(print printAdd ['X, 'Y] should be 15: )
+(printAdd (X Y))
