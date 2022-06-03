@@ -31,7 +31,7 @@
 (print ( 'symbol? 'Y should be '()' -> (symbol? Y)))
 (print \n)
 
-(print ( 'list? {1 2 3} should be T -> (list? (1 2 3))))
+(print ( 'list? '(1 2 3)' should be T -> (list? (1 2 3))))
 (print ( 'list? 4 should be '()' -> (list? 4)))
 (print \n)
 
